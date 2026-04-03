@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green St. Chipotle — Live Line Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+
+    @media print {
+      html, body { width: 8.5in; height: 11in; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    body {
+      width: 8.5in;
+      height: 11in;
+      background: #0a0a0a;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.55in 0.65in;
+      gap: 0.28in;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ───────────────────────────────────────────── */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(168, 22, 18, 0.18);
+      border: 1.5px solid #A81612;
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #f87171;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .uiuc-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #13294B;
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #FF5F05;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Headline ──────────────────────────────────────────── */
+    .headline-block {
+      text-align: center;
+      line-height: 1;
+    }
+
+    .headline-block h1 {
+      font-size: 70px;
+      font-weight: 900;
+      letter-spacing: -2.5px;
+      line-height: 0.95;
+    }
+
+    .headline-block h1 em {
+      font-style: normal;
+      color: #FF5F05;
+    }
+
+    .headline-block p {
+      margin-top: 12px;
+      font-size: 15px;
+      color: #e5e7eb;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Stat row ──────────────────────────────────────────── */
+    .stat-row {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .stat-card {
+      flex: 1;
+      border-radius: 16px;
+      padding: 18px 20px;
+      background: #111111;
+      border-left: 5px solid #FF5F05;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stat-card.red { border-left-color: #A81612; }
+
+    .stat-number {
+      font-size: 46px;
+      font-weight: 900;
+      color: #FF5F05;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .stat-card.red .stat-number { color: #f87171; }
+
+    .stat-label {
+      font-size: 12.5px;
+      color: #e5e7eb;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    /* ── Center section ────────────────────────────────────── */
+    .center {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .qr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .qr-block img {
+      width: 230px;
+      height: 230px;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* ── Right side content ────────────────────────────────── */
+    .right-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .info-card {
+      background: #111111;
+      border-radius: 14px;
+      padding: 16px 18px;
+      border-top: 3px solid #FF5F05;
+    }
+
+    .info-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #FF5F05;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+
+    .info-card p {
+      font-size: 13px;
+      color: #e5e7eb;
+      line-height: 1.55;
+    }
+
+    .info-card p strong { color: #ffffff; }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #111111;
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #13294B;
+      border: 2px solid #FF5F05;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #FF5F05;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 12.5px;
+      color: #e5e7eb;
+      line-height: 1.35;
+    }
+
+    .step-text strong { color: #ffffff; font-size: 13px; }
+
+    /* ── Divider ───────────────────────────────────────────── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #1f2937 20%, #1f2937 80%, transparent);
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .footer {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-col {
+      font-size: 11px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    .footer-col.right { text-align: right; }
+
+    .footer-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chipotle-wordmark {
+      font-size: 13px;
+      font-weight: 800;
+      color: #A81612;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .url-text {
+      font-size: 11px;
+      color: #9ca3af;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      Live · Crowdsourced
+    </div>
+    <div class="uiuc-pill">
+      🌽 &nbsp;Gies College of Business · 2026
+    </div>
+  </div>
+
+  <!-- Headline -->
+  <div class="headline-block">
+    <h1>Is the line<br><em>worth it</em> right now?</h1>
+    <p>Check the live wait time at Green St. Chipotle — updated by students, for students.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-number">~20%</div>
+      <div class="stat-label">More food when ordering<br><strong style="color:#fff;">in-person</strong> vs. the mobile app</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-number">3s</div>
+      <div class="stat-label">To check the current line<br><strong style="color:#fff;">before you walk over</strong></div>
+    </div>
+    <div class="stat-card" style="border-left-color:#13294B;">
+      <div class="stat-number" style="color:#818cf8;">100%</div>
+      <div class="stat-label">Student-reported.<br><strong style="color:#fff;">No cameras. No tracking.</strong></div>
+    </div>
+  </div>
+
+  <!-- Center: QR + info -->
+  <div class="center">
+
+    <div class="qr-block">
+      <img src="QRGreenStChipotleDashboard.png" alt="QR Code — Green St. Chipotle Live Tracker" />
+    </div>
+
+    <div class="right-content">
+
+      <div class="info-card">
+        <h3>The Chipotle Dilemma</h3>
+        <p>Online orders are convenient — but research shows in-person orders are <strong>~20% larger by weight</strong> at this location. If the line is short, walk in. If it's slammed, order online.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Scan</strong> the QR code to open the live dashboard</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Check</strong> the current crowd level in real time</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Report</strong> what you see — one tap helps everyone</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-col">
+      Crowdsourced by UIUC students<br>
+      Not affiliated with Chipotle Mexican Grill
+    </div>
+    <div class="footer-center">
+      <div class="chipotle-wordmark">🌯 Green St. Chipotle</div>
+      <div class="url-text">chipotle-dashboard.vercel.app</div>
+    </div>
+    <div class="footer-col right">
+      Built by Jun &nbsp;·&nbsp; jl193@illinois.edu<br>
+      UIUC Business Project · Spring 2026
+    </div>
+  </div>
+
+</body>
+</html>

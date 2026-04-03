@@ -508,7 +508,7 @@ export default function Home() {
             Mexican Grill.
           </p>
           <p className="text-xs" style={{ color: '#374151' }}>
-            Gies College of Business · 2026
+            Since 2026
           </p>
         </div>
 
