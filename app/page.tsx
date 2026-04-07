@@ -187,7 +187,7 @@ function majorityStatus(reports: Report[]): {
   )
   if (recent.length === 0) return { status: 'unknown', count: 0, newestAt: null }
 
-  const tally: Partial<Record<string, number>> = {}
+  const tally: Record<string, number> = {}
   for (const r of recent) tally[r.status] = (tally[r.status] ?? 0) + 1
   const winner = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0]
 
