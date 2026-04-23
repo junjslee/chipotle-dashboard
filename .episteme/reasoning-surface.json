@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-04-23T16:36:00Z",
+  "core_question": "Will deleting the orphaned lib/supabase.ts unblock the Vercel TypeScript build so the Firestore migration reaches production?",
+  "knowns": [
+    "Vercel build exited non-zero with TS error `Cannot find module '@supabase/supabase-js'` at lib/supabase.ts:1",
+    "package.json dependencies list no longer contains @supabase/supabase-js (Firestore migration removed it)",
+    "grep -rn '@supabase/supabase-js' across app/ and lib/ returns exactly one hit: lib/supabase.ts itself",
+    "grep -rn \"from '@/lib/supabase'\" across app/ and lib/ returns zero hits — no code imports the orphaned file",
+    "commit 8439dfed7603fa573466bf205db464940739605c (migration checkpoint at 02:06) deleted lib/supabase.ts correctly",
+    "commit 0b606159 (chkpt 11:10:02) re-added lib/supabase.ts per git blame — this is the regression source",
+    "local npm run dev on the current working tree successfully connects to Firestore and handles report inserts"
+  ],
+  "unknowns": [
+    "Why the 11:10 auto-checkpoint re-added lib/supabase.ts — suspected cause is episteme checkpoint hook capturing a stale IDE/editor working-copy, but the hook logs have not been read"
+  ],
+  "assumptions": [
+    "Deleting lib/supabase.ts is safe because zero app/ or lib/ files import from '@/lib/supabase' (verified via grep returning 0 hits)",
+    "Vercel's GitHub integration will auto-trigger a new deployment on push to main — prior pushes today have done so",
+    "A fresh deploy will clear the prior failure; the previous 500 was transient GitHub infra, and the subsequent failure was deterministic TS error which this change fixes"
+  ],
+  "constraint_identified": "lib/supabase.ts:1 — the orphaned import statement `import { createClient } from '@supabase/supabase-js'` that now resolves to a missing module after the Firestore migration removed the package from dependencies.",
+  "origin_evidence": "File originally introduced in commit f9cabe7 (initial: chipotle dashboard) as part of the pre-migration Supabase data layer. Correctly deleted in commit 8439dfed7603fa573466bf205db464940739605c (chkpt 2026-04-23T02:06:47) during the Firestore migration. Re-introduced accidentally in commit 0b606159 (chkpt 2026-04-23T11:10:02) per `git blame lib/supabase.ts` which attributes every line of the current file to that checkpoint SHA.",
+  "why_was_this_here": "lib/supabase.ts was the Supabase client module used before the Firestore migration — a legitimate fence through 8439dfe. Its current presence is not a deliberate fence; it is a regression from an auto-checkpoint that re-surfaced a file already decided to be removed.",
+  "why_safe_to_remove_now": "Zero callers: `grep -rn \"from '@/lib/supabase'\" app/ lib/` returns 0 hits. Its only import target (@supabase/supabase-js) is absent from package.json. The file is unreachable from any runtime entry point — its only consumer is the TypeScript compiler, which is exactly what fails on it.",
+  "removal_consequence_prediction": "After removal and push, the next Vercel build advances past the `Running TypeScript` phase, emits `Compiled successfully` with zero TS errors mentioning supabase, and completes with exit status 0. The live URL chipotle-dashboard.vercel.app then serves the Firestore-backed app, and browser DevTools shows zero console errors containing the string 'supabase'. Deviation (non-zero build exit, any build-log line containing 'supabase', runtime console error referencing supabase) falsifies this prediction.",
+  "reversibility_classification": "reversible",
+  "rollback_path": "If removal breaks anything, run `git revert HEAD && git push` to restore lib/supabase.ts. Full pre-migration restoration additionally requires `npm install @supabase/supabase-js@^2.101.1` and re-adding NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to Vercel project env vars. The backup copies of the migration-era files at /tmp/jl193_*.bak from the earlier git-history cleanup session are unrelated but unaffected.",
+  "disconfirmation": "The next Vercel deployment after this push completes with exit status 0 AND the live URL chipotle-dashboard.vercel.app serves the app without a console error mentioning supabase; any deviation (non-zero exit, supabase string in build log, runtime console error referencing supabase) falsifies the fix."
+}
